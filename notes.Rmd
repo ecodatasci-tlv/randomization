@@ -1,0 +1,35 @@
+# Randomization
+
+- How to do randomization in R - `sample()` (weighted sampling, how much to draw from a pool), `rnorm()`, `runif()`, `set.seed()`, etc.
+- Bootstrapping
+    - find video
+
+Irene will investigate rsample
+    
+# Null models
+
+- What are null models
+- How you construct them
+- What to do/what to look out for
+
+Take home: they are powerful but you have to be careful with how you construct them
+You have to write them yourselves!
+
+Biases:
+
+1. Narcissistic effect - incorporate the thing you are trying to test into your model
+2. Jack Horner - you detect something that you should have taken into account but didn't
+
+Example:
+- pokemon dataset: t.test versus null model
+- slight complication...pick and choose how you construct your model
+
+Are blue pokemon more likely to have high attack ratings?
+If 20% of pokemon are blue, you would randomly select 20% 1000x. Compare observed group to random groups
+
+Are blue pokemon more likely to be water pokemon?
+Weight sampling to make water more likely
+
+# Other stuff
+
+- cross-validation & friends
