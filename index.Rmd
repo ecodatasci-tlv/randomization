@@ -1,0 +1,172 @@
+---
+title: "Randomization and Null Models"
+subtitle: "EcoDataSci-TLV"
+date: "2019-03-13"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: ["default", "custom-fonts.css"]
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      ratio: '16:9'
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(tidyverse)
+conflicted::conflict_prefer("filter", "dplyr")
+
+options(htmltools.dir.version = FALSE,
+        tibble.width = 70,
+        ggplot2.continuous.colour = "viridis",
+        ggplot2.continuous.fill = "viridis")
+opts_chunk$set(
+  fig.width = 6.5,
+  fig.height = 4.5,
+  fig.align = "center",
+  cache = TRUE
+)
+theme_set(theme_minimal() +
+            theme(text = element_text(size = 20))) 
+```
+
+# What is randomization
+
+---
+
+# Make your randomization reproducible
+
+```{r}
+set.seed(20180313)
+```
+
+--
+
+```{r}
+snacks <- c("pretzels", "cookies", "popcorn", "bamba", "carrots")
+sample(snacks, 3)
+```
+
+_If you use the same seed, you should be getting the same results as us!_
+
+---
+# Sampling with replacement
+
+```{r error = TRUE}
+sample(snacks, 10)
+```
+
+--
+
+```{r}
+sample(snacks, 10, replace = TRUE)
+```
+
+---
+
+# Sample probabilities
+
+```{r}
+sample(snacks, 10, replace = TRUE,
+       prob = c(.8, .05, .05, .05, .05))
+```
+
+.center[.img-small[
+![](img/pretzel.jpg)
+]]
+
+---
+
+# Shortcut: use an integer instead of a vector
+
+```{r}
+sample(5)
+sample(1:5)
+```
+
+---
+class: center, inverse, middle
+
+# `?Distributions`
+---
+
+# Types of distributions
+
+- **d**xxx - density/mass function
+- **p**xxx - cumulative distribution function
+- **q**xxx - quantile function
+- **r**xxx - random generation
+
+---
+
+# Uniform distribution 
+
+```{r}
+tibble(x = runif(1000)) %>% #<<
+  ggplot(aes(x)) + geom_histogram(bins = 50)
+```
+
+---
+# Normal distribution
+
+```{r}
+tibble(x = rnorm(1000)) %>% #<<
+  ggplot(aes(x)) + geom_histogram(bins = 50)
+```
+
+---
+# Binomial distribution
+
+```{r}
+tibble(x = rbinom(1000, 1, prob = .7)) %>% #<<
+  ggplot(aes(x)) + geom_histogram(bins = 50)
+```
+
+---
+# Bootstrapping
+
+.center[
+![](https://wilkelab.org/ungeviz/articles/sampling-bootstrapping_files/figure-html/bootstrap-demo-1.gif)
+]
+
+[ungeviz](https://wilkelab.org/ungeviz/index.html) by Claus Wilke
+---
+class: middle, center, inverse
+
+# Null models
+---
+
+# What are null models
+---
+# How you construct them
+---
+# What to do/what to look out for
+---
+# Biases:
+
+1. Narcissistic effect - incorporate the thing you are trying to test into your model
+2. Jack Horner - you detect something that you should have taken into account but didn't
+
+---
+Example:
+- pokemon dataset: t.test versus null model
+- slight complication...pick and choose how you construct your model
+
+Are blue pokemon more likely to have high attack ratings?
+If 20% of pokemon are blue, you would randomly select 20% 1000x. Compare observed group to random groups
+
+Are blue pokemon more likely to be water pokemon?
+Weight sampling to make water more likely
+---
+# Take home
+
+Null models are powerful but you have to be careful about how you construct them
+You have to write them yourselves!
+
+---
+
+# Other stuff
+
+- cross-validation & friends
