@@ -138,18 +138,48 @@ class: middle, center, inverse
 
 # Null models
 ---
+# What are null models?
 
-# What are null models
----
-# How you construct them
----
-# What to do/what to look out for
----
-# Biases:
+_A null model is a pattern generating model that is based on randomization of…data or random sampling from a known or imagined distribution. The null model is designed with respect to some ecological or evolutionary process of interest’._
 
-1. Narcissistic effect - incorporate the thing you are trying to test into your model
-2. Jack Horner - you detect something that you should have taken into account but didn't
+.pull-left[
+![](img/null.png)
+]
 
+.pull-right[
+Gotelli & Graves 1996
+
+_Null models in ecology_
+]
+---
+# Why use them?
+
+1) Assumptions of classical statistical tests are often not met.
+
+2) Random processes may result in non-random patterns.
+
+.center[
+![](img/Mudkip.png)
+]
+
+---
+# How to prepare your own null model in 5 easy steps!
+
+.pull-left[
+1) Collect data
+
+2) Break the structure in the data by replacing process of interest with random draw
+
+3) Repeat many, many, many times
+
+4) Collate all the repetitions to generate a null distribution
+
+5) Compare obaserved pattern to random pattern expected by chance
+]
+
+.bottom[
+![](img/MarthaStewart.tif)
+]
 ---
 # Example:
 Do grey Pokemon have higher defense values than other pokemon?
@@ -186,7 +216,7 @@ x <- pokemon$defense
 t <- vector(length = 10000)
 ```
 ---
-4. This is our null model - for each iteration, we randomly sample n values out of x, without replacements. This gives us a simulated "grey" group, where pokemon are assigned randomly. We then calculate a t-score for that group. After running this process for t iterations, we get a null distribution of t-scores.
+4) This is our null model - for each iteration, we randomly sample n values out of x, without replacements. This gives us a simulated "grey" group, where pokemon are assigned randomly. We then calculate a t-score for that group. After running this process for t iterations, we get a null distribution of t-scores.
 ```{r}
 for (i in 1:length(t)){
     grey <- sample(x, n, replace = F)
@@ -214,9 +244,9 @@ p.val
 ---
 Now let's visualize this. We'll plot the histogram of the null distribution, and mark our observed value with a red line: We can see here very clearly that our observed t-score is very, very extreme.
 ```{r}
-data_frame(null = t, obs = obs$mean) %>%
+data_frame(scores = t, obs = obs$mean) %>%
     ggplot() +
-    geom_density(aes(null)) + 
+    geom_density(aes(scores)) + 
     geom_vline(xintercept = obs[[1]], color = "red")
 ```
 ---
@@ -235,7 +265,7 @@ One of the things we can do is to make sure, when we construct our model, to mak
 In this case, we would give a higher probability to selecting a steel type Pokemon when generating our "grey" group.
 How much higher?
 
-In this case we would base it on the distribution of types of *all* grey Pokemon, to make sure our simulated "grey" group has a similar distribution of types as our observed group.
+For this example we can base it on the distribution of types of *all* grey Pokemon, to make sure our simulated "grey" group has a similar distribution of types as our observed group.
 ---
 ```{r}
 chi_data <- table(pokemon$type_1, pokemon$color2)
@@ -243,6 +273,10 @@ grey_prop <- data_frame(
     type_1 = row.names(chi_data),
     prop = chi_data[,2]/sum(chi_data[,2])
 )
+grey_prop
+```
+---
+```{r}
 pokemon <- merge(grey_prop, pokemon, by = "type_1")
 
 n <- length(which(pokemon$color2 == "Grey"))
@@ -275,9 +309,9 @@ p.val
 ```
 ---
 ```{r}
-data_frame(null = t2, obs = obs$mean) %>%
+data_frame(scores = t2, obs = obs$mean) %>%
     ggplot() +
-    geom_density(aes(null)) + 
+    geom_density(aes(scores)) + 
     geom_vline(xintercept = obs[[1]], color = "red")
 ```
 In this case the results are basically the same, still a significant difference.
@@ -290,19 +324,59 @@ data_frame(random = t, weighted = t2) %>%
               fill = "model")
 ```
 ---
-- pokemon dataset: t.test versus null model
-- slight complication...pick and choose how you construct your model
+# Biases:
 
-Are blue pokemon more likely to have high attack ratings?
-If 20% of pokemon are blue, you would randomly select 20% 1000x. Compare observed group to random groups
+There are two main issues that can occur when constructing null models, and we should always be aware of them:
 
-Are blue pokemon more likely to be water pokemon?
-Weight sampling to make water more likely
+.bottom[
+![](img/frustration.jpg)
+]
+---
+
+# 1) Narcissus effect
+### (Colwell & Winkler 1984)
+
+.pull-left[
+The null model algorithm includes the effect it was trying to omit.
+
+##INFLATED TYPE II ERROR RATE!
+
+_'Narcissus could not see the bottom of the pool for his own image, and could not guess its depth.'_
+]
+
+.bottom-right[
+![](img/narcissus.jpg)
+]
+---
+#2) Jack Horner effect
+### (Wilson 1995)
+
+.pull-left[
+The null model algorithm omits effects it shouldn't.
+
+##INFLATED TYPE I ERROR RATE!
+
+_'Jack Horner...thought himself a good boy for demonstrating that plum pies contain plums.'_
+
+]
+
+.bottom-right[
+![](img/jackhorner.jpg)
+]
 ---
 # Take home
 
-Null models are powerful but you have to be careful about how you construct them
-You have to write them yourselves!
+Null models are powerful!!!
+
+1) They can be tailor-made to fit any type of data/question;
+
+2) They require _zero_ assumptions about the underlying structure of the data;
+
+But you have to use your brain, even more than usual!
+
+.bottom-right[
+![](img/Psyduck.png)
+]
 
 ---
 
