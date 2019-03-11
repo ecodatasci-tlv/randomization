@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Randomization and Null Models</title>
+    <meta charset="utf-8" />
+    <meta name="date" content="2019-03-13" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link rel="stylesheet" href="custom-fonts.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Randomization and Null Models
+## EcoDataSci-TLV
+### 2019-03-13
+
+---
+
+
+
+
+# What is randomization
+
+---
+
+# Make your randomization reproducible
+
+
+```r
+set.seed(20180313)
+```
+
+--
+
+
+```r
+snacks &lt;- c("pretzels", "cookies", "popcorn", "bamba", "carrots")
+sample(snacks, 3)
+```
+
+```
+## [1] "popcorn" "cookies" "bamba"
+```
+
+_If you use the same seed, you should be getting the same results as us!_
+
+---
+# Sampling with replacement
+
+
+```r
+sample(snacks, 10)
+```
+
+```
+## Error in sample.int(length(x), size, replace, prob): cannot take a sample larger than the population when 'replace = FALSE'
+```
+
+--
+
+
+```r
+sample(snacks, 10, replace = TRUE)
+```
+
+```
+##  [1] "pretzels" "popcorn"  "carrots"  "carrots"  "bamba"    "popcorn" 
+##  [7] "carrots"  "carrots"  "cookies"  "bamba"
+```
+
+---
+
+# Sample probabilities
+
+
+```r
+sample(snacks, 10, replace = TRUE,
+       prob = c(.8, .05, .05, .05, .05))
+```
+
+```
+##  [1] "pretzels" "pretzels" "pretzels" "pretzels" "pretzels" "pretzels"
+##  [7] "pretzels" "pretzels" "pretzels" "pretzels"
+```
+
+.center[.img-small[
+![](img/pretzel.jpg)
+]]
+
+---
+
+# Shortcut: use an integer instead of a vector
+
+
+```r
+sample(5)
+```
+
+```
+## [1] 2 1 3 5 4
+```
+
+```r
+sample(1:5)
+```
+
+```
+## [1] 2 5 1 3 4
+```
+
+---
+class: center, inverse, middle
+
+# `?Distributions`
+---
+
+# Types of distributions
+
+- **d**xxx - density/mass function
+- **p**xxx - cumulative distribution function
+- **q**xxx - quantile function
+- **r**xxx - random generation
+
+---
+
+# Uniform distribution 
+
+
+```r
+*tibble(x = runif(1000)) %&gt;%
+  ggplot(aes(x)) + geom_histogram(bins = 50)
+```
+
+&lt;img src="index_files/figure-html/unnamed-chunk-7-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+# Normal distribution
+
+
+```r
+*tibble(x = rnorm(1000)) %&gt;%
+  ggplot(aes(x)) + geom_histogram(bins = 50)
+```
+
+&lt;img src="index_files/figure-html/unnamed-chunk-8-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+# Binomial distribution
+
+
+```r
+*tibble(x = rbinom(1000, 1, prob = .7)) %&gt;%
+  ggplot(aes(x)) + geom_histogram(bins = 50)
+```
+
+&lt;img src="index_files/figure-html/unnamed-chunk-9-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+# Bootstrapping
+
+.center[
+![](https://wilkelab.org/ungeviz/articles/sampling-bootstrapping_files/figure-html/bootstrap-demo-1.gif)
+]
+
+[ungeviz](https://wilkelab.org/ungeviz/index.html) by Claus Wilke
+---
+class: middle, center, inverse
+
+# Null models
+---
+
+# What are null models
+---
+# How you construct them
+---
+# What to do/what to look out for
+---
+# Biases:
+
+1. Narcissistic effect - incorporate the thing you are trying to test into your model
+2. Jack Horner - you detect something that you should have taken into account but didn't
+
+---
+# Example:
+Do grey Pokemon have higher defense values than other pokemon?
+
+```r
+pokemon &lt;- read_csv("data/pokemon.csv")
+```
+
+We can run a simple t-test to find out:
+
+```r
+pokemon &lt;- pokemon %&gt;%
+    mutate(color2 = fct_collapse(
+        color,
+        Grey = c("Grey"),
+        Not_grey = c("Black", "Blue", "Brown", "Green", "Pink", "Purple", "Red", "White", "Yellow")
+    ))
+```
+---
+
+```r
+t.test(defense ~ color2, pokemon)
+```
+
+```
+## 
+## 	Welch Two Sample t-test
+## 
+## data:  defense by color2
+## t = -4.5122, df = 75.696, p-value = 2.31e-05
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -30.59050 -11.85429
+## sample estimates:
+## mean in group Not_grey     mean in group Grey 
+##               68.77761               90.00000
+```
+The answer is: yes, they do.
+---
+# Now let's do the same thing but with a null model instead!
+1) A numeric value: how many observations are in our group of interest?
+
+```r
+n &lt;- length(which(pokemon$color2 == "Grey"))
+```
+2) A vector containing the pooled observations.
+
+```r
+x &lt;- pokemon$defense
+```
+3) An empty vector in the length of however many iterations we want to run.
+
+```r
+t &lt;- vector(length = 10000)
+```
+---
+4. This is our null model - for each iteration, we randomly sample n values out of x, without replacements. This gives us a simulated "grey" group, where pokemon are assigned randomly. We then calculate a t-score for that group. After running this process for t iterations, we get a null distribution of t-scores.
+
+```r
+for (i in 1:length(t)){
+    grey &lt;- sample(x, n, replace = F)
+    not_grey &lt;- setdiff(x, grey)
+    t[i] &lt;- (mean(grey) - mean(not_grey)) / (sqrt(var(grey)/length(grey)))
+}
+```
+---
+Now that we have a null distribution, we can calculate the observed t-score:
+
+```r
+pokemon_sum &lt;- pokemon %&gt;%
+    group_by(color2) %&gt;%
+    summarise(
+        mean = mean(defense),
+        se = sqrt(var(defense))/n()
+    )
+obs &lt;- (pokemon_sum[2,2] - pokemon_sum[1,2])/pokemon_sum[2,3]
+```
+And of course, a p-value.
+This is calculated as the precentage of t-scores in the null distribution as extreme, or more extreme, than the observed t-score.
+
+```r
+p.val&lt;-(length(which(abs(t) &gt;= abs(as.numeric(obs)))) / length(t))
+p.val
+```
+
+```
+## [1] 0
+```
+---
+Now let's visualize this. We'll plot the histogram of the null distribution, and mark our observed value with a red line: We can see here very clearly that our observed t-score is very, very extreme.
+
+```r
+data_frame(null = t, obs = obs$mean) %&gt;%
+    ggplot() +
+    geom_density(aes(null)) + 
+    geom_vline(xintercept = obs[[1]], color = "red")
+```
+
+&lt;img src="index_files/figure-html/unnamed-chunk-19-1.png" style="display: block; margin: auto;" /&gt;
+---
+
+Now we can start adding complications. For instance, you may recall that _grey_ Pokemon tend to be _steel_ type.
+
+.center[
+![](img/Steelix.png)
+![](img/Skarmory.png)
+]
+So how do we incorporate this into our null model?
+---
+# Weighted sampling
+One of the things we can do is to make sure, when we construct our model, to make the sampling from the pool not random, but weighted according to another variable.
+
+In this case, we would give a higher probability to selecting a steel type Pokemon when generating our "grey" group.
+How much higher?
+
+In this case we would base it on the distribution of types of *all* grey Pokemon, to make sure our simulated "grey" group has a similar distribution of types as our observed group.
+---
+
+```r
+chi_data &lt;- table(pokemon$type_1, pokemon$color2)
+grey_prop &lt;- data_frame(
+    type_1 = row.names(chi_data),
+    prop = chi_data[,2]/sum(chi_data[,2])
+)
+pokemon &lt;- merge(grey_prop, pokemon, by = "type_1")
+
+n &lt;- length(which(pokemon$color2 == "Grey"))
+x &lt;- pokemon$defense
+t2 &lt;- vector(length = 10000)
+prop &lt;- pokemon$prop
+
+for (i in 1:length(t)){
+    grey &lt;- sample(x,
+                   n,
+                   replace = F,
+                   prob = prop)
+    not_grey &lt;- setdiff(x, grey)
+    t2[i] &lt;- (mean(grey) - mean(not_grey)) / (sqrt(var(grey)/length(grey)))
+}
+```
+---
+
+```r
+pokemon_sum &lt;- pokemon %&gt;%
+    group_by(color2) %&gt;%
+    summarise(
+        mean = mean(defense),
+        se = sqrt(var(defense))/n()
+    )
+obs &lt;- (pokemon_sum[2,2] - pokemon_sum[1,2])/pokemon_sum[2,3]
+
+p.val&lt;-(length(which(abs(t2) &gt;= abs(as.numeric(obs)))) / length(t2))
+p.val
+```
+
+```
+## [1] 0
+```
+---
+
+```r
+data_frame(null = t2, obs = obs$mean) %&gt;%
+    ggplot() +
+    geom_density(aes(null)) + 
+    geom_vline(xintercept = obs[[1]], color = "red")
+```
+
+&lt;img src="index_files/figure-html/unnamed-chunk-22-1.png" style="display: block; margin: auto;" /&gt;
+In this case the results are basically the same, still a significant difference.
+---
+But if we look more closely, we can see that the null distributions actually differ slightly from one another:
+
+```r
+data_frame(random = t, weighted = t2) %&gt;%
+    gather("model", "scores") %&gt;%
+    ggdensity(x = "scores",
+              fill = "model")
+```
+
+&lt;img src="index_files/figure-html/unnamed-chunk-23-1.png" style="display: block; margin: auto;" /&gt;
+---
+- pokemon dataset: t.test versus null model
+- slight complication...pick and choose how you construct your model
+
+Are blue pokemon more likely to have high attack ratings?
+If 20% of pokemon are blue, you would randomly select 20% 1000x. Compare observed group to random groups
+
+Are blue pokemon more likely to be water pokemon?
+Weight sampling to make water more likely
+---
+# Take home
+
+Null models are powerful but you have to be careful about how you construct them
+You have to write them yourselves!
+
+---
+
+# Other stuff
+
+- cross-validation &amp; friends
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"ratio": "16:9",
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
