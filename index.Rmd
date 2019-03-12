@@ -143,7 +143,7 @@ class: middle, center, inverse
 _A null model is a pattern generating model that is based on randomization of…data or random sampling from a known or imagined distribution. The null model is designed with respect to some ecological or evolutionary process of interest’._
 
 .pull-left[
-![](img/null.png)
+![](img/Null.png)
 ]
 
 .pull-right[
@@ -269,7 +269,7 @@ For this example we can base it on the distribution of types of *all* grey Pokem
 ---
 ```{r}
 chi_data <- table(pokemon$type_1, pokemon$color2)
-grey_prop <- data_frame(
+grey_prop <- tibble(
     type_1 = row.names(chi_data),
     prop = chi_data[,2]/sum(chi_data[,2])
 )
@@ -309,7 +309,7 @@ p.val
 ```
 ---
 ```{r}
-data_frame(scores = t2, obs = obs$mean) %>%
+tibble(scores = t2, obs = obs$mean) %>%
     ggplot() +
     geom_density(aes(scores)) + 
     geom_vline(xintercept = obs[[1]], color = "red")
@@ -318,7 +318,7 @@ In this case the results are basically the same, still a significant difference.
 ---
 But if we look more closely, we can see that the null distributions actually differ slightly from one another:
 ```{r}
-data_frame(random = t, weighted = t2) %>%
+tibble(random = t, weighted = t2) %>%
     gather("model", "scores") %>%
     ggdensity(x = "scores",
               fill = "model")
