@@ -17,6 +17,7 @@ output:
 library(knitr)
 library(tidyverse)
 library(ggpubr)
+library(gam)
 conflicted::conflict_prefer("filter", "dplyr")
 
 options(htmltools.dir.version = FALSE,
@@ -408,6 +409,205 @@ But you have to use your brain, even more than usual!
 
 ---
 
-# Other stuff
+# Cross-validation!
 
-- cross-validation & friends
+Cross-validation is a useful tool to test how good your model is. How?
+
+1) Divide your data into a training set and a test (validation) set. _This is where randomization is important!_
+
+2) Build your model using the training set.
+
+3) Test your model predictions on the test set!
+
+_A good model will give good predictions on the testing set._
+
+---
+
+# There are many different methods for cross-validation.
+
+Many rely on randomly sampling part of your data to divide it into a training and test set, and repeating the process many times to eventually average the measure of how good the model is across all iteration.
+
+##Sounds familiar?
+
+.bottom-right[
+.img-small[
+![](img/Ditto.png)
+]
+]
+---
+
+```{r}
+library(caret)
+```
+
+We are going to be using this package for our cross-validation purposes, although it's useful for many other things to do with predictive modeling, and it interfaces with a ton of other packages.
+
+Look into it:
+http://topepo.github.io/caret/
+
+.bottom-right[
+![](img/Trainer.png)
+]
+
+---
+class: exercise
+
+# Exercise
+
+Which model best predicts the relationship between _attack_ and _special defense_ scores of Pokemon?
+
+.center[
+![](img/Mewtwo.png)
+![](img/Shuckle.png)
+]
+
+---
+
+Let's begin with a scatterplot:
+```{r}
+pokemon %>% 
+    ggplot(aes(attack, sp_def)) +
+    geom_point()
+```
+
+---
+
+We can see that there is a somewhat linear relationship between the two variables. So we can try to fit three types of models:
+
+1) a linear model.
+
+1.5) a linear model with a quadratic term.
+
+2) a general additive model with loess smoothing.
+
+---
+
+```{r}
+model1 <- lm(sp_def ~ attack, data = pokemon)
+pokemon %>% 
+    ggplot(aes(attack, sp_def)) +
+    geom_point() +
+    geom_smooth(method = "lm")
+```
+
+---
+
+```{r}
+model1.5 <- lm(sp_def ~ I(attack^2), data = pokemon)
+pokemon %>% 
+    ggplot(aes(attack, sp_def)) +
+    geom_point() +
+    geom_smooth(method = "lm", formula = y ~ I(x^2))
+```
+
+---
+
+```{r}
+model2 <- gam(sp_def ~ lo(attack), data = pokemon)
+pokemon %>% 
+    ggplot(aes(attack, sp_def)) +
+    geom_point() +
+    geom_smooth(method = "loess")
+```
+
+---
+class: inverse, middle, center
+
+###Which model is better?
+
+---
+
+# k-folds cross-validation
+
+1) Randomly split your entire dataset into _k_ ”folds”.
+
+2) For each _k_-fold, build your model on _k_ – 1 folds of the dataset. Then, test the model on the _k_ th fold.
+
+3) Save the error of the model for each _k_-fold.
+
+4) Repeat until each of the _k_-folds has served as the test set.
+
+5) The average of the _k_ errors is  the <b>cross-validation error</b> - the lower this value is, the better your model.
+
+---
+
+# k-folds cross-validation
+
+.center[
+![](img/kfolds.jpg)
+]
+
+---
+
+```{r}
+train_control <- trainControl(method="cv", number=10)
+```
+
+This function determines how we create training sets.
+
+_method_ determines which method to use. "cv" gives us k-folds cross-validation, and _number_ determines how many _k_ folds we choose.
+
+<b>Selecting the correct _k_ is not trivial at all, and will affect your results!</b> For now let's use 10.
+
+.center[
+![](img/UnownK.png)
+]
+---
+
+```{r message=FALSE, warning=FALSE}
+model1 <- train(sp_def ~ attack,
+                data = pokemon,
+                trControl = train_control,
+                method = "lm")
+
+model1.5 <- train(sp_def ~ I(attack^2),
+                  data = pokemon,
+                  trControl = train_control,
+                  method = "lm")
+
+model2 <- train(sp_def ~ attack,
+                data = pokemon,
+                trControl = train_control,
+                method = "gamLoess")
+```
+
+_train_ is the function to actually run the cross-validation process, using the control parameters we set up with _trainControl_.
+
+_method_ determines the model we use - there are many!
+
+---
+
+```{r}
+model1
+```
+
+---
+
+```{r}
+model1.5
+```
+
+---
+
+```{r}
+model2
+```
+
+---
+
+We choose the model with the lowest average error across all _k_ iterations - in this case, <b>model2</b> with an average RMSE of _26.31513_.
+
+Out of our three options, this model performed best in the cross-validation process.
+
+.right[
+![](img/Spheal.png)
+]
+---
+
+# Take home
+
+Cross-validation can be useful. <b>Use it!</b>
+
+.center[
+![](img/Leg.png)
+]
