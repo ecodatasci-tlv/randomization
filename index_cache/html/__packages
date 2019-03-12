@@ -13,3 +13,7 @@ forcats
 bindrcpp
 magrittr
 ggpubr
+lattice
+caret
+foreach
+gam
