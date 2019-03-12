@@ -17,3 +17,11 @@ lattice
 caret
 foreach
 gam
+devtools
+usethis
+reprex
+beepr
+tictoc
+future
+furrr
+rbenchmark

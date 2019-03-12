@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<html>
   <head>
     <title>Randomization and Null Models</title>
-    <meta charset="utf-8" />
+    <meta charset="utf-8">
     <meta name="date" content="2019-03-13" />
     <link href="libs/remark-css/default.css" rel="stylesheet" />
     <link rel="stylesheet" href="custom-fonts.css" type="text/css" />
@@ -20,11 +20,23 @@ class: center, middle, inverse, title-slide
 
 
 
-# What is randomization
+# What is randomization? 
 
+Randomization = the process of making something random
+
+--
+
+Today, we'll be discussing randomization in _statistical sampling_
+
+.center[
+.img-small[
+[![](https://wilkelab.org/ungeviz/articles/sampling-bootstrapping_files/figure-html/bootstrap-demo-1.gif)
+](https://wilkelab.org/ungeviz/index.html)
+]
+]
 ---
 
-# Make your randomization reproducible
+# Make your randomization _reproducible_
 
 
 ```r
@@ -43,8 +55,26 @@ sample(snacks, 3)
 ## [1] "popcorn" "cookies" "bamba"
 ```
 
-_If you use the same seed, you should be getting the same results as us!_
 
+---
+class: exercise
+
+# Exercise
+
+Run this code several times:
+
+
+```r
+set.seed(20180313)
+snacks &lt;- c("pretzels", "cookies", "popcorn", "bamba", "carrots")
+sample(snacks, 3)
+```
+
+What happens when you run `set.seed()` each time? What happens when you only run the last line?
+
+--
+
+_If you use the same seed, you should be getting the same results as us!_
 ---
 # Sampling with replacement
 
@@ -132,7 +162,7 @@ class: center, inverse, middle
   ggplot(aes(x)) + geom_histogram(bins = 50)
 ```
 
-&lt;img src="index_files/figure-html/unnamed-chunk-7-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-8-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 # Normal distribution
@@ -143,7 +173,7 @@ class: center, inverse, middle
   ggplot(aes(x)) + geom_histogram(bins = 50)
 ```
 
-&lt;img src="index_files/figure-html/unnamed-chunk-8-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-9-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 # Binomial distribution
@@ -154,16 +184,20 @@ class: center, inverse, middle
   ggplot(aes(x)) + geom_histogram(bins = 50)
 ```
 
-&lt;img src="index_files/figure-html/unnamed-chunk-9-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-10-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
-# Bootstrapping
 
-.center[
-![](https://wilkelab.org/ungeviz/articles/sampling-bootstrapping_files/figure-html/bootstrap-demo-1.gif)
-]
+class: exercise
 
-[ungeviz](https://wilkelab.org/ungeviz/index.html) by Claus Wilke
+# Exercise
+
+How would you use the density functions to create the following plot, which has mean = 2 and SD = 1?
+
+&lt;img src="index_files/figure-html/unnamed-chunk-11-1.png" style="display: block; margin: auto;" /&gt;
+
+Hint: Set the x-values to `seq(0, 5, by = 0.1)`
+
 ---
 class: middle, center, inverse
 
@@ -171,7 +205,7 @@ class: middle, center, inverse
 ---
 # What are null models?
 
-_A null model is a pattern generating model that is based on randomization of…data or random sampling from a known or imagined distribution. The null model is designed with respect to some ecological or evolutionary process of interest’._
+_A null model is a pattern generating model that is based on randomization of…data or random sampling from a known or imagined distribution. The null model is designed with respect to some ecological or evolutionary process of interest._
 
 .pull-left[
 ![](img/Null.png)
@@ -185,9 +219,9 @@ _Null models in ecology_
 ---
 # Why use them?
 
-1) Assumptions of classical statistical tests are often not met.
+1) Assumptions of classical statistical tests are often not met
 
-2) Random processes may result in non-random patterns.
+2) Random processes may result in non-random patterns
 
 .center[
 ![](img/Mudkip.png)
@@ -196,42 +230,43 @@ _Null models in ecology_
 ---
 # How to prepare your own null model in 5 easy steps!
 
-.pull-left[
+.pull-left-big[
 1) Collect data
 
-2) Break the structure in the data by replacing process of interest with random draw
+2) Break the structure in the data. Replace the process of interest with a random draw
 
 3) Repeat many, many, many times
 
 4) Collate all the repetitions to generate a null distribution
 
-5) Compare obaserved pattern to random pattern expected by chance
+5) Compare observed pattern to random pattern expected by chance
 ]
 
-.bottom[
-![](img/MarthaStewart.tif)
+.pull-right-small[
+.center[
+![](img/MarthaStewart.jpg)
+]
 ]
 ---
 # Example:
+
 Do grey Pokemon have higher defense values than other pokemon?
 
+
 ```r
+library(tidyverse)
 pokemon &lt;- read_csv("data/pokemon.csv")
 ```
 
+---
+
 We can run a simple t-test to find out:
+
 
 ```r
 pokemon &lt;- pokemon %&gt;%
-    mutate(color2 = fct_collapse(
-        color,
-        Grey = c("Grey"),
-        Not_grey = c("Black", "Blue", "Brown", "Green", "Pink", "Purple", "Red", "White", "Yellow")
-    ))
-```
----
+  mutate(color2 = if_else(color == "Grey", "Grey", "Not_grey"))
 
-```r
 t.test(defense ~ color2, pokemon)
 ```
 
@@ -240,59 +275,97 @@ t.test(defense ~ color2, pokemon)
 ## 	Welch Two Sample t-test
 ## 
 ## data:  defense by color2
-## t = -4.5122, df = 75.696, p-value = 2.31e-05
+## t = 4.5122, df = 75.696, p-value = 2.31e-05
 ## alternative hypothesis: true difference in means is not equal to 0
 ## 95 percent confidence interval:
-##  -30.59050 -11.85429
+##  11.85429 30.59050
 ## sample estimates:
-## mean in group Not_grey     mean in group Grey 
-##               68.77761               90.00000
+##     mean in group Grey mean in group Not_grey 
+##               90.00000               68.77761
 ```
+--
 The answer is: yes, they do.
 ---
-# Now let's do the same thing but with a null model instead!
+# Now let's do it with a null model instead!
+
 1) A numeric value: how many observations are in our group of interest?
 
 ```r
-n &lt;- length(which(pokemon$color2 == "Grey"))
+n_grey &lt;- sum(pokemon$color2 == "Grey")
 ```
+--
+
 2) A vector containing the pooled observations.
 
 ```r
-x &lt;- pokemon$defense
+pooled_obs &lt;- pokemon$defense
 ```
+--
+
 3) An empty vector in the length of however many iterations we want to run.
 
 ```r
 t &lt;- vector(length = 10000)
 ```
+
 ---
-4) This is our null model - for each iteration, we randomly sample n values out of x, without replacements. This gives us a simulated "grey" group, where pokemon are assigned randomly. We then calculate a t-score for that group. After running this process for t iterations, we get a null distribution of t-scores.
+
+4) This is our null model - for each iteration, we randomly sample our `pooled_obs` to create simulated `grey` and `not_grey` groups, then calculate a t-score. After running this process for `t` iterations, we get a null distribution of t-scores.
+
 
 ```r
 for (i in 1:length(t)){
-    grey &lt;- sample(x, n, replace = F)
-    not_grey &lt;- setdiff(x, grey)
-    t[i] &lt;- (mean(grey) - mean(not_grey)) / (sqrt(var(grey)/length(grey)))
+  # sample WITHOUT replacement
+  grey_idx &lt;- sample(length(pooled_obs), n_grey, 
+                     replace = FALSE)
+  
+  # create simulated grey &amp; not_grey groups
+  grey &lt;- pooled_obs[grey_idx] 
+  not_grey &lt;- pooled_obs[-grey_idx]
+  
+  # calculate t-score
+  t[i] &lt;- t.test(grey, not_grey)$statistic
 }
 ```
+
 ---
-Now that we have a null distribution, we can calculate the observed t-score:
+
+Now that we have a null distribution, we can calculate the **observed t-score**:
+
 
 ```r
-pokemon_sum &lt;- pokemon %&gt;%
-    group_by(color2) %&gt;%
-    summarise(
-        mean = mean(defense),
-        se = sqrt(var(defense))/n()
-    )
-obs &lt;- (pokemon_sum[2,2] - pokemon_sum[1,2])/pokemon_sum[2,3]
+(poke_sum &lt;- pokemon %&gt;%
+   group_by(color2) %&gt;%
+   summarise(
+     mean = mean(defense),
+     se = sd(defense) / sqrt(n())
+   ))
 ```
-And of course, a p-value.
+
+```
+## # A tibble: 2 x 3
+##   color2    mean    se
+##   &lt;chr&gt;    &lt;dbl&gt; &lt;dbl&gt;
+## 1 Grey      90    4.58
+## 2 Not_grey  68.8  1.08
+```
+
+```r
+(obs &lt;- (poke_sum$mean[2] - poke_sum$mean[1])/poke_sum$se[2])
+```
+
+```
+## [1] -19.72172
+```
+
+---
+
+And of course, a **p-value**.
 This is calculated as the precentage of t-scores in the null distribution as extreme, or more extreme, than the observed t-score.
 
+
 ```r
-p.val&lt;-(length(which(abs(t) &gt;= abs(as.numeric(obs)))) / length(t))
+p.val &lt;- sum(abs(t) &gt;= abs(obs)) / length(t)
 p.val
 ```
 
@@ -300,16 +373,19 @@ p.val
 ## [1] 0
 ```
 ---
-Now let's visualize this. We'll plot the histogram of the null distribution, and mark our observed value with a red line: We can see here very clearly that our observed t-score is very, very extreme.
+
+Now let's visualize this. We'll plot the histogram of the null distribution, and mark our observed value with a red line: We can see clearly that our observed t-score is very, very extreme.
+
 
 ```r
-data_frame(scores = t, obs = obs$mean) %&gt;%
-    ggplot() +
-    geom_density(aes(scores)) + 
-    geom_vline(xintercept = obs[[1]], color = "red")
+tibble(scores = t, obs = obs) %&gt;%
+  ggplot() +
+  geom_density(aes(scores)) + 
+  geom_vline(xintercept = obs, color = "red")
 ```
 
-&lt;img src="index_files/figure-html/unnamed-chunk-19-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-20-1.png" style="display: block; margin: auto;" /&gt;
+
 ---
 
 Now we can start adding complications. For instance, you may recall that _grey_ Pokemon tend to be _steel_ type.
@@ -318,114 +394,112 @@ Now we can start adding complications. For instance, you may recall that _grey_ 
 ![](img/Steelix.png)
 ![](img/Skarmory.png)
 ]
-So how do we incorporate this into our null model?
+
+How do we incorporate this into our null model?
 ---
 # Weighted sampling
-One of the things we can do is to make sure, when we construct our model, to make the sampling from the pool not random, but weighted according to another variable.
+
+One of the things we can do is to construct our model with sampling that is _weighted_ according to another variable, rather than randomly.  
+
+--
 
 In this case, we would give a higher probability to selecting a steel type Pokemon when generating our "grey" group.
-How much higher?
 
-For this example we can base it on the distribution of types of *all* grey Pokemon, to make sure our simulated "grey" group has a similar distribution of types as our observed group.
+_How much higher?_ 
+
+For this example, we can base the probability on the distribution of types of *all* grey Pokemon, to make sure our simulated "grey" group has a similar distribution of types as our observed group.
 ---
 
 ```r
-chi_data &lt;- table(pokemon$type_1, pokemon$color2)
-grey_prop &lt;- tibble(
-    type_1 = row.names(chi_data),
-    prop = chi_data[,2]/sum(chi_data[,2])
-)
+grey_prop &lt;- pokemon %&gt;% 
+   filter(color2 == "Grey") %&gt;%
+   count(type_1) %&gt;% 
+   mutate(prop = n/sum(n))
+
 grey_prop
 ```
 
 ```
-## # A tibble: 18 x 2
-##    type_1     prop
-##    &lt;chr&gt;     &lt;dbl&gt;
-##  1 Bug      0.116 
-##  2 Dark     0.0580
-##  3 Dragon   0.0145
-##  4 Electric 0.0435
-##  5 Fairy    0     
-##  6 Fighting 0.0870
-##  7 Fire     0     
-##  8 Flying   0     
-##  9 Ghost    0     
-## 10 Grass    0.0435
-## 11 Ground   0.0870
-## 12 Ice      0.0290
-## 13 Normal   0.145 
-## 14 Poison   0     
-## 15 Psychic  0.0290
-## 16 Rock     0.145 
-## 17 Steel    0.145 
-## 18 Water    0.0580
+## # A tibble: 13 x 3
+##    type_1       n   prop
+##    &lt;chr&gt;    &lt;int&gt;  &lt;dbl&gt;
+##  1 Bug          8 0.116 
+##  2 Dark         4 0.0580
+##  3 Dragon       1 0.0145
+##  4 Electric     3 0.0435
+##  5 Fighting     6 0.0870
+##  6 Grass        3 0.0435
+##  7 Ground       6 0.0870
+##  8 Ice          2 0.0290
+##  9 Normal      10 0.145 
+## 10 Psychic      2 0.0290
+## 11 Rock        10 0.145 
+## 12 Steel       10 0.145 
+## 13 Water        4 0.0580
 ```
 ---
 
+Let's add the proportions back into our data frame.
+
+
 ```r
-pokemon &lt;- merge(grey_prop, pokemon, by = "type_1")
+pokemon &lt;- left_join(pokemon, grey_prop, by = "type_1") %&gt;% 
+  mutate(prop = replace_na(prop, 0))
+```
 
-n &lt;- length(which(pokemon$color2 == "Grey"))
-x &lt;- pokemon$defense
-t2 &lt;- vector(length = 10000)
-prop &lt;- pokemon$prop
+...and then we can calculate our null distribution again, using weighted probabilities.  We'll store the null distributions in a new variable, `t2`. 
+---
 
-for (i in 1:length(t)){
-    grey &lt;- sample(x,
-                   n,
-                   replace = F,
-                   prob = prop)
-    not_grey &lt;- setdiff(x, grey)
-    t2[i] &lt;- (mean(grey) - mean(not_grey)) / (sqrt(var(grey)/length(grey)))
+```r
+n_grey &lt;- sum(pokemon$color2 == "Grey")
+pooled_obs &lt;- pokemon$defense
+t2 &lt;- vector(length = 10000) 
+*prop &lt;- pokemon$prop
+```
+
+
+```r
+for (i in 1:length(t2)){
+  grey_idx &lt;- sample(length(pooled_obs), n_grey, 
+                     replace = FALSE, 
+*                    prob = prop)
+  
+  grey &lt;- pooled_obs[grey_idx] 
+  not_grey &lt;- pooled_obs[-grey_idx]
+  
+  t2[i] &lt;- t.test(grey, not_grey)$statistic
 }
 ```
+
 ---
 
 ```r
-pokemon_sum &lt;- pokemon %&gt;%
-    group_by(color2) %&gt;%
-    summarise(
-        mean = mean(defense),
-        se = sqrt(var(defense))/n()
-    )
-obs &lt;- (pokemon_sum[2,2] - pokemon_sum[1,2])/pokemon_sum[2,3]
-
-p.val&lt;-(length(which(abs(t2) &gt;= abs(as.numeric(obs)))) / length(t2))
-p.val
+tibble(scores = t2, obs = obs) %&gt;%
+  ggplot() +
+  geom_density(aes(scores)) + 
+  geom_vline(xintercept = obs, color = "red")
 ```
 
-```
-## [1] 0
-```
----
+&lt;img src="index_files/figure-html/unnamed-chunk-25-1.png" style="display: block; margin: auto;" /&gt;
 
-```r
-tibble(scores = t2, obs = obs$mean) %&gt;%
-    ggplot() +
-    geom_density(aes(scores)) + 
-    geom_vline(xintercept = obs[[1]], color = "red")
-```
-
-&lt;img src="index_files/figure-html/unnamed-chunk-23-1.png" style="display: block; margin: auto;" /&gt;
 In this case the results are basically the same, still a significant difference.
 ---
 But if we look more closely, we can see that the null distributions actually differ slightly from one another:
 
+
 ```r
 tibble(random = t, weighted = t2) %&gt;%
-    gather("model", "scores") %&gt;%
-    ggdensity(x = "scores",
-              fill = "model")
+  gather("model", "scores") %&gt;%
+  ggpubr::ggdensity(x = "scores", fill = "model")
 ```
 
-&lt;img src="index_files/figure-html/unnamed-chunk-24-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-26-1.png" style="display: block; margin: auto;" /&gt;
 ---
-# Biases:
+# Biases
 
 There are two main issues that can occur when constructing null models, and we should always be aware of them:
 
-.bottom[
+.center[
 ![](img/frustration.jpg)
 ]
 ---
@@ -436,7 +510,7 @@ There are two main issues that can occur when constructing null models, and we s
 .pull-left[
 The null model algorithm includes the effect it was trying to omit.
 
-##INFLATED TYPE II ERROR RATE!
+## INFLATED TYPE II ERROR RATE!
 
 _'Narcissus could not see the bottom of the pool for his own image, and could not guess its depth.'_
 ]
@@ -540,7 +614,7 @@ pokemon %&gt;%
     geom_point()
 ```
 
-&lt;img src="index_files/figure-html/unnamed-chunk-26-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-28-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -563,7 +637,7 @@ pokemon %&gt;%
     geom_smooth(method = "lm")
 ```
 
-&lt;img src="index_files/figure-html/unnamed-chunk-27-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-29-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -576,7 +650,7 @@ pokemon %&gt;%
     geom_smooth(method = "lm", formula = y ~ I(x^2))
 ```
 
-&lt;img src="index_files/figure-html/unnamed-chunk-28-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-30-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -589,12 +663,12 @@ pokemon %&gt;%
     geom_smooth(method = "loess")
 ```
 
-&lt;img src="index_files/figure-html/unnamed-chunk-29-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-31-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 class: inverse, middle, center
 
-###Which model is better?
+## Which model is better?
 
 ---
 
@@ -676,8 +750,8 @@ model1
 ## Summary of sample sizes: 648, 650, 648, 648, 648, 648, ... 
 ## Resampling results:
 ## 
-##   RMSE      Rsquared    MAE     
-##   26.35148  0.06018275  20.21779
+##   RMSE    Rsquared    MAE     
+##   26.295  0.05588356  20.22219
 ## 
 ## Tuning parameter 'intercept' was held constant at a value of TRUE
 ```
@@ -700,8 +774,8 @@ model1.5
 ## Summary of sample sizes: 648, 648, 649, 649, 650, 649, ... 
 ## Resampling results:
 ## 
-##   RMSE     Rsquared    MAE     
-##   26.3821  0.06155288  20.30365
+##   RMSE      Rsquared    MAE     
+##   26.24213  0.06925968  20.31121
 ## 
 ## Tuning parameter 'intercept' was held constant at a value of TRUE
 ```
@@ -724,8 +798,8 @@ model2
 ## Summary of sample sizes: 648, 650, 649, 648, 648, 651, ... 
 ## Resampling results:
 ## 
-##   RMSE      Rsquared    MAE    
-##   26.31513  0.06250771  20.2172
+##   RMSE      Rsquared    MAE     
+##   26.35617  0.04960317  20.26133
 ## 
 ## Tuning parameter 'span' was held constant at a value of 0.5
 ## 
@@ -751,7 +825,6 @@ Cross-validation can be useful. &lt;b&gt;Use it!&lt;/b&gt;
 ![](img/Leg.png)
 ]
     </textarea>
-<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({
 "highlightStyle": "github",
@@ -762,57 +835,16 @@ Cross-validation can be useful. &lt;b&gt;Use it!&lt;/b&gt;
 if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
   window.dispatchEvent(new Event('resize'));
 });
-(function(d) {
-  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+(function() {
+  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
   if (!r) return;
   s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
   d.head.appendChild(s);
-})(document);
-
-(function(d) {
-  var el = d.getElementsByClassName("remark-slides-area");
-  if (!el) return;
-  var slide, slides = slideshow.getSlides(), els = el[0].children;
-  for (var i = 1; i < slides.length; i++) {
-    slide = slides[i];
-    if (slide.properties.continued === "true" || slide.properties.count === "false") {
-      els[i - 1].className += ' has-continuation';
-    }
-  }
-  var s = d.createElement("style");
-  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
-  d.head.appendChild(s);
-})(document);
-// delete the temporary CSS (for displaying all slides initially) when the user
-// starts to view slides
-(function() {
-  var deleted = false;
-  slideshow.on('beforeShowSlide', function(slide) {
-    if (deleted) return;
-    var sheets = document.styleSheets, node;
-    for (var i = 0; i < sheets.length; i++) {
-      node = sheets[i].ownerNode;
-      if (node.dataset["target"] !== "print-only") continue;
-      node.parentNode.removeChild(node);
-    }
-    deleted = true;
-  });
 })();</script>
 
 <script>
 (function() {
-  var links = document.getElementsByTagName('a');
-  for (var i = 0; i < links.length; i++) {
-    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
-      links[i].target = '_blank';
-    }
-  }
-})();
-</script>
-
-<script>
-slideshow._releaseMath = function(el) {
-  var i, text, code, codes = el.getElementsByTagName('code');
+  var i, text, code, codes = document.getElementsByTagName('code');
   for (i = 0; i < codes.length;) {
     code = codes[i];
     if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
@@ -826,8 +858,7 @@ slideshow._releaseMath = function(el) {
     }
     i++;
   }
-};
-slideshow._releaseMath(document);
+})();
 </script>
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>

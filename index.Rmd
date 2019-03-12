@@ -34,11 +34,23 @@ theme_set(theme_minimal() +
             theme(text = element_text(size = 20))) 
 ```
 
-# What is randomization
+# What is randomization? 
 
+Randomization = the process of making something random
+
+--
+
+Today, we'll be discussing randomization in _statistical sampling_
+
+.center[
+.img-small[
+[![](https://wilkelab.org/ungeviz/articles/sampling-bootstrapping_files/figure-html/bootstrap-demo-1.gif)
+](https://wilkelab.org/ungeviz/index.html)
+]
+]
 ---
 
-# Make your randomization reproducible
+# Make your randomization _reproducible_
 
 ```{r}
 set.seed(20180313)
@@ -51,8 +63,25 @@ snacks <- c("pretzels", "cookies", "popcorn", "bamba", "carrots")
 sample(snacks, 3)
 ```
 
-_If you use the same seed, you should be getting the same results as us!_
 
+---
+class: exercise
+
+# Exercise
+
+Run this code several times:
+
+```{r eval = FALSE}
+set.seed(20180313)
+snacks <- c("pretzels", "cookies", "popcorn", "bamba", "carrots")
+sample(snacks, 3)
+```
+
+What happens when you run `set.seed()` each time? What happens when you only run the last line?
+
+--
+
+_If you use the same seed, you should be getting the same results as us!_
 ---
 # Sampling with replacement
 
@@ -127,13 +156,22 @@ tibble(x = rbinom(1000, 1, prob = .7)) %>% #<<
 ```
 
 ---
-# Bootstrapping
 
-.center[
-![](https://wilkelab.org/ungeviz/articles/sampling-bootstrapping_files/figure-html/bootstrap-demo-1.gif)
-]
+class: exercise
 
-[ungeviz](https://wilkelab.org/ungeviz/index.html) by Claus Wilke
+# Exercise
+
+How would you use the density functions to create the following plot, which has mean = 2 and SD = 1?
+
+```{r echo = FALSE}
+tibble(x = seq(0, 5, by = 0.1),
+       y = dnorm(x, mean = 2, sd = 1)) %>% 
+  ggplot(aes(x, y)) +
+  geom_line()
+```
+
+Hint: Set the x-values to `seq(0, 5, by = 0.1)`
+
 ---
 class: middle, center, inverse
 
@@ -167,15 +205,15 @@ _Null models in ecology_
 # How to prepare your own null model in 5 easy steps!
 
 .pull-left-big[
-1. Collect data
+1) Collect data
 
-2. Break the structure in the data. Replace the process of interest with a random draw
+2) Break the structure in the data. Replace the process of interest with a random draw
 
-3. Repeat many, many, many times
+3) Repeat many, many, many times
 
-4. Collate all the repetitions to generate a null distribution
+4) Collate all the repetitions to generate a null distribution
 
-5. Compare observed pattern to random pattern expected by chance
+5) Compare observed pattern to random pattern expected by chance
 ]
 
 .pull-right-small[
@@ -189,20 +227,21 @@ _Null models in ecology_
 Do grey Pokemon have higher defense values than other pokemon?
 
 ```{r message=FALSE}
+library(tidyverse)
 pokemon <- read_csv("data/pokemon.csv")
 ```
+
+---
 
 We can run a simple t-test to find out:
 
 ```{r}
 pokemon <- pokemon %>%
   mutate(color2 = if_else(color == "Grey", "Grey", "Not_grey"))
-```
----
-```{r}
+
 t.test(defense ~ color2, pokemon)
 ```
-
+--
 The answer is: yes, they do.
 ---
 # Now let's do it with a null model instead!
@@ -211,11 +250,13 @@ The answer is: yes, they do.
 ```{r}
 n_grey <- sum(pokemon$color2 == "Grey")
 ```
+--
 
 2) A vector containing the pooled observations.
 ```{r}
 pooled_obs <- pokemon$defense
 ```
+--
 
 3) An empty vector in the length of however many iterations we want to run.
 ```{r}
@@ -291,9 +332,12 @@ How do we incorporate this into our null model?
 One of the things we can do is to construct our model with sampling that is _weighted_ according to another variable, rather than randomly.  
 
 --
+
 In this case, we would give a higher probability to selecting a steel type Pokemon when generating our "grey" group.
 
-_How much higher?_ For this example, we can base the probability on the distribution of types of *all* grey Pokemon, to make sure our simulated "grey" group has a similar distribution of types as our observed group.
+_How much higher?_ 
+
+For this example, we can base the probability on the distribution of types of *all* grey Pokemon, to make sure our simulated "grey" group has a similar distribution of types as our observed group.
 ---
 ```{r}
 grey_prop <- pokemon %>% 
@@ -312,9 +356,8 @@ pokemon <- left_join(pokemon, grey_prop, by = "type_1") %>%
   mutate(prop = replace_na(prop, 0))
 ```
 
+...and then we can calculate our null distribution again, using weighted probabilities.  We'll store the null distributions in a new variable, `t2`. 
 ---
-Now we can get our null distribution again and store it in a new variable, `t2`. The main change here is using `prop` for the sampling probabilities.
-
 ```{r}
 n_grey <- sum(pokemon$color2 == "Grey")
 pooled_obs <- pokemon$defense
@@ -513,7 +556,7 @@ pokemon %>%
 ---
 class: inverse, middle, center
 
-###Which model is better?
+## Which model is better?
 
 ---
 
