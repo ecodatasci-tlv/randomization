@@ -34,6 +34,16 @@ theme_set(theme_minimal() +
             theme(text = element_text(size = 20))) 
 ```
 
+# Set-up
+
+Download the exercises if you haven't already.
+
+```{r eval = FALSE}
+usethis::use_course("http://bit.ly/eds-random")
+```
+
+---
+
 # What is randomization? 
 
 Randomization = the process of making something random

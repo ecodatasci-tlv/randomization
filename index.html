@@ -20,6 +20,17 @@ class: center, middle, inverse, title-slide
 
 
 
+# Set-up
+
+Download the exercises if you haven't already.
+
+
+```r
+usethis::use_course("http://bit.ly/eds-random")
+```
+
+---
+
 # What is randomization? 
 
 Randomization = the process of making something random
@@ -162,7 +173,7 @@ class: center, inverse, middle
   ggplot(aes(x)) + geom_histogram(bins = 50)
 ```
 
-&lt;img src="index_files/figure-html/unnamed-chunk-8-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-9-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 # Normal distribution
@@ -173,7 +184,7 @@ class: center, inverse, middle
   ggplot(aes(x)) + geom_histogram(bins = 50)
 ```
 
-&lt;img src="index_files/figure-html/unnamed-chunk-9-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-10-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 # Binomial distribution
@@ -184,7 +195,7 @@ class: center, inverse, middle
   ggplot(aes(x)) + geom_histogram(bins = 50)
 ```
 
-&lt;img src="index_files/figure-html/unnamed-chunk-10-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-11-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -194,7 +205,7 @@ class: exercise
 
 How would you use the density functions to create the following plot, which has mean = 2 and SD = 1?
 
-&lt;img src="index_files/figure-html/unnamed-chunk-11-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-12-1.png" style="display: block; margin: auto;" /&gt;
 
 Hint: Set the x-values to `seq(0, 5, by = 0.1)`
 
@@ -384,7 +395,7 @@ tibble(scores = t, obs = obs) %&gt;%
   geom_vline(xintercept = obs, color = "red")
 ```
 
-&lt;img src="index_files/figure-html/unnamed-chunk-20-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-21-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -480,7 +491,7 @@ tibble(scores = t2, obs = obs) %&gt;%
   geom_vline(xintercept = obs, color = "red")
 ```
 
-&lt;img src="index_files/figure-html/unnamed-chunk-25-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-26-1.png" style="display: block; margin: auto;" /&gt;
 
 In this case the results are basically the same, still a significant difference.
 ---
@@ -491,7 +502,7 @@ class: exercise
 
 How do you plot both distributions on the same graph? What does this tell you about the distributions?
 
-&lt;img src="index_files/figure-html/unnamed-chunk-26-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-27-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 # Biases
@@ -586,6 +597,14 @@ Many rely on randomly sampling part of your data to divide it into a training an
 library(caret)
 ```
 
+```
+## Warning: package 'caret' was built under R version 3.5.2
+```
+
+```
+## Loading required package: lattice
+```
+
 We are going to be using this package for our cross-validation purposes, although it's useful for many other things to do with predictive modeling, and it interfaces with a ton of other packages.
 
 Look into it:
@@ -617,7 +636,7 @@ pokemon %&gt;%
     geom_point()
 ```
 
-&lt;img src="index_files/figure-html/unnamed-chunk-28-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-29-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -640,7 +659,7 @@ pokemon %&gt;%
     geom_smooth(method = "lm")
 ```
 
-&lt;img src="index_files/figure-html/unnamed-chunk-29-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-30-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -653,7 +672,7 @@ pokemon %&gt;%
     geom_smooth(method = "lm", formula = y ~ I(x^2))
 ```
 
-&lt;img src="index_files/figure-html/unnamed-chunk-30-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-31-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -666,7 +685,7 @@ pokemon %&gt;%
     geom_smooth(method = "loess")
 ```
 
-&lt;img src="index_files/figure-html/unnamed-chunk-31-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-32-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 class: inverse, middle, center
