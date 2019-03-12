@@ -55,3 +55,12 @@
 .exercise h1, .inverse h2, .inverse h3 {
   color: #f3f3f3;
 }
+
+.pull-left-big {
+  float: left;
+  width: 57%;
+}
+.pull-right-small {
+  float: right;
+  width: 37%;
+}
