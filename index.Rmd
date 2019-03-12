@@ -388,13 +388,19 @@ tibble(scores = t2, obs = obs) %>%
 
 In this case the results are basically the same, still a significant difference.
 ---
-But if we look more closely, we can see that the null distributions actually differ slightly from one another:
 
-```{r}
+class: exercise
+
+# Exercise
+
+How do you plot both distributions on the same graph? What does this tell you about the distributions?
+
+```{r echo = FALSE}
 tibble(random = t, weighted = t2) %>%
   gather("model", "scores") %>%
   ggpubr::ggdensity(x = "scores", fill = "model")
 ```
+
 ---
 # Biases
 
@@ -450,6 +456,10 @@ But you have to use your brain, even more than usual!
 ![](img/Psyduck.png)
 ]
 
+---
+class: inverse, middle, center
+
+# Cross-validation
 ---
 
 # Cross-validation!
