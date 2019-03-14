@@ -17,3 +17,8 @@ if(!require(ggpubr)) install.packages("ggpubr")
 if(!require(caret)) install.packages("caret")
 if(!require(gam)) install.packages("gam")
 ```
+
+Other resources:
+
+- [blogpost](https://dynamicecology.wordpress.com/2012/08/30/why-do-our-null-models-nullify-some-effects-and-not-others/) about null models
+- [caret](http://topepo.github.io/caret/index.html) package website
