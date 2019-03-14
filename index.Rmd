@@ -207,6 +207,8 @@ _Null models in ecology_
 
 2) Random processes may result in non-random patterns
 
+_Note:_ Null models will not solve problems with homogeneity of variance!
+
 .center[
 ![](img/Mudkip.png)
 ]
